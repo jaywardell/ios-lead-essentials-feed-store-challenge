@@ -60,17 +60,21 @@ public final class RealmFeedStore: FeedStore {
 	}
 		
 	private func accessRealm(_ callback: (Realm)->()) throws {
-		try autoreleasepool {
-			let realm = try Realm(configuration: configuration)
-			callback(realm)
+		try queue.sync {
+			try autoreleasepool {
+				let realm = try Realm(configuration: configuration, queue: queue)
+				callback(realm)
+			}
 		}
 	}
 	
 	private func writeToRealm(_ callback: (Realm)->()) throws {
-		try autoreleasepool {
-			let realm = try Realm(configuration: configuration)
-			try realm.write {
-				callback(realm)
+		try queue.sync {
+			try autoreleasepool {
+				let realm = try Realm(configuration: configuration, queue: queue)
+				try realm.write {
+					callback(realm)
+				}
 			}
 		}
 	}
