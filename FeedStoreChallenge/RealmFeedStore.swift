@@ -17,23 +17,35 @@ final class RealmFeedStoreCachedFeedImage: Object {
 	@objc fileprivate dynamic var desc: String?
 	@objc fileprivate dynamic var location: String?
 	@objc fileprivate dynamic var url: String?
-	@objc fileprivate dynamic var timestamp: Date?
 
-	fileprivate class func createFeedImage(from localFeedImage: LocalFeedImage, at timestamp: Date) -> RealmFeedStoreCachedFeedImage {
+	fileprivate class func create(from localFeedImage: LocalFeedImage, at timestamp: Date) -> RealmFeedStoreCachedFeedImage {
 		
 		let out = RealmFeedStoreCachedFeedImage()
 		out.id = localFeedImage.id.uuidString
 		out.desc = localFeedImage.description
 		out.location = localFeedImage.location
 		out.url = localFeedImage.url.absoluteString
-		
-		out.timestamp = timestamp
-		
+				
 		return out
 	}
 		
 	fileprivate var localFeedImage: LocalFeedImage {
 		LocalFeedImage(id: UUID(uuidString: id!)!, description: desc, location: location, url: URL(string: url!)!)
+	}
+}
+
+/// This is an internal type to RealmFeedStore
+/// It should not be used by any code outside this file
+// we would make it fileprivate, but Realm complains with an error
+final class RealmFeedStoreTimestamp: Object {
+	@objc fileprivate dynamic var timestamp: Date?
+	
+	fileprivate class func create(from timestamp: Date) -> RealmFeedStoreTimestamp {
+		
+		let out = RealmFeedStoreTimestamp()
+		out.timestamp = timestamp
+		
+		return out
 	}
 }
 
@@ -53,8 +65,10 @@ public final class RealmFeedStore: FeedStore {
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
 		try! realm.write {
 			for image in feed {
-				realm.add(RealmFeedStoreCachedFeedImage.createFeedImage(from: image, at: timestamp))
+				realm.add(RealmFeedStoreCachedFeedImage.create(from: image, at: timestamp))
 			}
+			
+			realm.add(RealmFeedStoreTimestamp.create(from: timestamp))
 		}
 		completion(nil)
 	}
@@ -66,7 +80,7 @@ public final class RealmFeedStore: FeedStore {
 				$0.localFeedImage
 			}
 			
-			let timestamp = cached.first!.timestamp!
+			let timestamp = realm.objects(RealmFeedStoreTimestamp.self).first!.timestamp!			
 			
 			completion(.found(feed: Array(feedImages), timestamp: timestamp))
 		}
