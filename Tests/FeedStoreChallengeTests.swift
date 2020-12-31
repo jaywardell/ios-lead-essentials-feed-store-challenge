@@ -149,6 +149,10 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 		URL(string: "invalid://store-url")!
 	}
 
+	private func cachesDirectory() -> URL {
+		FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+	}
+
 }
 
 //  ***********************
@@ -162,12 +166,24 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_deliversFailureOnRetrievalError() {
-		let sut = makeSUT(at: invalidStoreURL())
+		let sut = makeSUT(at: cachesDirectory())
 
 		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
 	}
 
 	func test_retrieve_hasNoSideEffectsOnFailure() {
+		let sut = makeSUT(at: cachesDirectory())
+
+		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
+	}
+
+	func test_retrieve_deliversFailureOnRetrievalError_forInvalidURL() {
+		let sut = makeSUT(at: invalidStoreURL())
+
+		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
+	}
+
+	func test_retrieve_hasNoSideEffectsOnFailure_forInvalidURL() {
 		let sut = makeSUT(at: invalidStoreURL())
 
 		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
