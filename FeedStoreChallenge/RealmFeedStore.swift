@@ -58,42 +58,46 @@ public final class RealmFeedStore: FeedStore {
 		self.configuration = Realm.Configuration(fileURL: fileURL)
 		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated)
 	}
-	
-	private func oneUseRealm() throws -> Realm {
-		// from the documentation for Realm.init():
-		// Realm instances are cached internally, and constructing equivalent Realm objects (for example, by using the same path or identifier) produces limited overhead.
-		try Realm(configuration: configuration)
+		
+	private func accessRealm(_ callback: (Realm)->()) throws {
+		try autoreleasepool {
+			let realm = try Realm(configuration: configuration)
+			callback(realm)
+		}
 	}
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
 
-		let realm = try! oneUseRealm()
-		clearOld(from: realm)
-		completion(nil)
+		try! accessRealm { realm in
+			clearOld(from: realm)
+			completion(nil)
+		}
 	}
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
 		
-		let realm = try! oneUseRealm()
-		clearOld(from: realm)
-		try! realm.write {
-			for image in feed {
-				realm.add(RealmFeedStoreCachedFeedImage.create(from: image, at: timestamp))
+		try! accessRealm { realm in
+			clearOld(from: realm)
+			try! realm.write {
+				for image in feed {
+					realm.add(RealmFeedStoreCachedFeedImage.create(from: image, at: timestamp))
+				}
+				
+				realm.add(RealmFeedStoreTimestamp.create(from: timestamp))
 			}
-			
-			realm.add(RealmFeedStoreTimestamp.create(from: timestamp))
+			completion(nil)
 		}
-		completion(nil)
 	}
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
 
-		let realm = try! oneUseRealm()
-		guard let timestamp = realm.objects(RealmFeedStoreTimestamp.self).last?.timestamp else { return completion(.empty) }
-
-		let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)
-		let feedImages = Array(cached.map(\.localFeedImage))
-		completion(.found(feed: feedImages, timestamp: timestamp))
+		try! accessRealm { realm in
+			guard let timestamp = realm.objects(RealmFeedStoreTimestamp.self).last?.timestamp else { return completion(.empty) }
+			
+			let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)
+			let feedImages = Array(cached.map(\.localFeedImage))
+			completion(.found(feed: feedImages, timestamp: timestamp))
+		}
 	}
 	
 	private func clearOld(from realm: Realm) {
