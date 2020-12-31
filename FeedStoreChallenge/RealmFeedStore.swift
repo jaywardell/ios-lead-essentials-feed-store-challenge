@@ -63,6 +63,9 @@ public final class RealmFeedStore: FeedStore {
 	}
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
+		
+		clearOld()
+		
 		try! realm.write {
 			for image in feed {
 				realm.add(RealmFeedStoreCachedFeedImage.create(from: image, at: timestamp))
@@ -75,10 +78,16 @@ public final class RealmFeedStore: FeedStore {
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
 
-		guard let timestamp = realm.objects(RealmFeedStoreTimestamp.self).first?.timestamp else { return completion(.empty) }
+		guard let timestamp = realm.objects(RealmFeedStoreTimestamp.self).last?.timestamp else { return completion(.empty) }
 
-		let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)		
+		let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)
 		let feedImages = Array(cached.map(\.localFeedImage))
 		completion(.found(feed: feedImages, timestamp: timestamp))
+	}
+	
+	private func clearOld() {
+		try! realm.write {
+			realm.deleteAll()
+		}
 	}
 }
