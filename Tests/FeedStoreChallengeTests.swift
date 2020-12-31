@@ -102,9 +102,9 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	
 	// - MARK: Helpers
 	
-	private func makeSUT(at fileURL: URL? = nil, readonly: Bool = false, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
+	private func makeSUT(at fileURL: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
 		let fileURL = fileURL ?? testSpecificStoreURL()
-		let sut = RealmFeedStore(fileURL, readOnly: readonly)
+		let sut = RealmFeedStore(fileURL)
 		trackForMemoryLeaks(sut, file: file, line: line)
 		return sut
 	}
@@ -117,6 +117,11 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	
 	private func testSpecificStoreURL() -> URL {
 		let out = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self)).realm")
+		return out
+	}
+
+	private func testSpecificReadOnlyStoreURL() -> URL {
+		let out = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self))_readonly.realm")
 		return out
 	}
 
@@ -197,9 +202,12 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 
 		// trying to write into a realm that is readonly
 		// will cause an error
-		let sut = makeSUT(readonly: true)
+		let sut = RealmFeedStore(testSpecificReadOnlyStoreURL(), readOnly: true)
+		trackForMemoryLeaks(sut)
 
 		assertThatInsertDeliversErrorOnInsertionError(on: sut)
+		
+		clearRealmFiles(at: testSpecificReadOnlyStoreURL())
 	}
 
 	func test_insert_hasNoSideEffectsOnInsertionError() {
@@ -207,12 +215,15 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 		// In order to test retrieval after a failed insert
 		// we need an existing realm file that the retrieve can read
 		// but we need it to be empty when insert() is called
-		writeEmptyRealmFile(at: testSpecificStoreURL())
+		writeEmptyRealmFile(at: testSpecificReadOnlyStoreURL())
 
 		// trying to insert into a realm that is readonly will cause an error
-		let sut = makeSUT(readonly: true)
-		
+		let sut = RealmFeedStore(testSpecificReadOnlyStoreURL(), readOnly: true)
+		trackForMemoryLeaks(sut)
+
 		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
+
+		clearRealmFiles(at: testSpecificReadOnlyStoreURL())
 	}
 
 	private func writeEmptyRealmFile(at fileURL: URL) {
@@ -220,7 +231,7 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 		// create an existing realm at the standard test location
 		// and write to it, but leave it empty
 		// so that a file exists at the expected path
-		let existingRealm = RealmFeedStore(testSpecificStoreURL())
+		let existingRealm = RealmFeedStore(fileURL)
 		let exp1 = expectation(description: "Wait for dummy insertion")
 		existingRealm.insert(uniqueImageFeed(), timestamp: Date()) {_ in
 			exp1.fulfill()

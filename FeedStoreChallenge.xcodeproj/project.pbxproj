@@ -21,6 +21,7 @@
 		7C8A1E89259E0D770007F3EF /* RealmFeedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A1E88259E0D770007F3EF /* RealmFeedStore.swift */; };
 		7C8A1E8E259E0FE00007F3EF /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 7C8A1E8D259E0FE00007F3EF /* Realm */; };
 		7C8A1E90259E0FE00007F3EF /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7C8A1E8F259E0FE00007F3EF /* RealmSwift */; };
+		7CBAEC86259E5B9E00E1294F /* ObjectiveCExceptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CBAEC85259E5B9E00E1294F /* ObjectiveCExceptions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,8 @@
 		08CE2BAE2285BCE700183A1B /* XCTestCase+FailableInsertFeedStoreSpecs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTestCase+FailableInsertFeedStoreSpecs.swift"; sourceTree = "<group>"; };
 		08CE2BB42285BEF100183A1B /* FeedStoreChallengeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedStoreChallengeTests.swift; sourceTree = "<group>"; };
 		7C8A1E88259E0D770007F3EF /* RealmFeedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmFeedStore.swift; sourceTree = "<group>"; };
+		7CBAEC82259E5B6100E1294F /* BridgingHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BridgingHeader.h; sourceTree = "<group>"; };
+		7CBAEC85259E5B9E00E1294F /* ObjectiveCExceptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectiveCExceptions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +78,7 @@
 		08CE2B812285BBD100183A1B = {
 			isa = PBXGroup;
 			children = (
+				7CBAEC82259E5B6100E1294F /* BridgingHeader.h */,
 				08CE2B8D2285BBD100183A1B /* FeedStoreChallenge */,
 				08CE2B982285BBD100183A1B /* Tests */,
 				08CE2B8C2285BBD100183A1B /* Products */,
@@ -97,6 +101,7 @@
 				08CE2BA72285BCC600183A1B /* LocalFeedImage.swift */,
 				08CE2BA52285BCB600183A1B /* FeedStore.swift */,
 				7C8A1E88259E0D770007F3EF /* RealmFeedStore.swift */,
+				7CBAEC85259E5B9E00E1294F /* ObjectiveCExceptions.swift */,
 				08CE2B8F2285BBD100183A1B /* Info.plist */,
 			);
 			path = FeedStoreChallenge;
@@ -244,6 +249,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				08CE2BA62285BCB600183A1B /* FeedStore.swift in Sources */,
+				7CBAEC86259E5B9E00E1294F /* ObjectiveCExceptions.swift in Sources */,
 				7C8A1E89259E0D770007F3EF /* RealmFeedStore.swift in Sources */,
 				08CE2BA82285BCC600183A1B /* LocalFeedImage.swift in Sources */,
 			);
@@ -421,6 +427,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.essentialdeveloper.FeedStoreChallenge;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = BridgingHeader.h;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -449,6 +456,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.essentialdeveloper.FeedStoreChallenge;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = BridgingHeader.h;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
