@@ -11,16 +11,17 @@ import RealmSwift
 
 /// This is an internal type to RealmFeedStore
 /// It should not be used by any code outside this file
-final class CachedFeedImage: Object {
+// we would make it fileprivate, but Realm complains with an error
+final class RealmFeedStoreCachedFeedImage: Object {
 	@objc fileprivate dynamic var id: String?
 	@objc fileprivate dynamic var desc: String?
 	@objc fileprivate dynamic var location: String?
 	@objc fileprivate dynamic var url: String?
 	@objc fileprivate dynamic var timestamp: Date?
 
-	fileprivate class func createFeedImage(from localFeedImage: LocalFeedImage, at timestamp: Date) -> CachedFeedImage {
+	fileprivate class func createFeedImage(from localFeedImage: LocalFeedImage, at timestamp: Date) -> RealmFeedStoreCachedFeedImage {
 		
-		let out = CachedFeedImage()
+		let out = RealmFeedStoreCachedFeedImage()
 		out.id = localFeedImage.id.uuidString
 		out.desc = localFeedImage.description
 		out.location = localFeedImage.location
@@ -52,14 +53,14 @@ public final class RealmFeedStore: FeedStore {
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
 		try! realm.write {
 			for image in feed {
-				realm.add(CachedFeedImage.createFeedImage(from: image, at: timestamp))
+				realm.add(RealmFeedStoreCachedFeedImage.createFeedImage(from: image, at: timestamp))
 			}
 		}
 		completion(nil)
 	}
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
-		let cached = realm.objects(CachedFeedImage.self)
+		let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)
 		if cached.count > 0 {
 			let feedImages = cached.map {
 				$0.localFeedImage
