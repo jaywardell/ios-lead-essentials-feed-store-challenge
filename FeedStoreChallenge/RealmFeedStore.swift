@@ -73,13 +73,18 @@ public final class RealmFeedStore: FeedStore {
 		}
 	}
 	
-	private func writeToRealm(_ callback: (Realm?)->()) throws {
-		try queue.sync {
-			try autoreleasepool {
-				let realm = try Realm(configuration: configuration, queue: queue)
-				try realm.write {
-					callback(realm)
+	private func writeToRealm(_ callback: @escaping (Realm?)->()) throws {
+		queue.async {
+			do {
+				try autoreleasepool { [unowned self] in
+					let realm = try Realm(configuration: configuration, queue: queue)
+					try realm.write {
+						callback(realm)
+					}
 				}
+			}
+			catch {
+				
 			}
 		}
 	}
@@ -89,7 +94,7 @@ public final class RealmFeedStore: FeedStore {
 		try! writeToRealm { realm in
 			guard let realm = realm else { return completion(nil) }
 
-			clearOld(from: realm)
+			realm.deleteAll()
 			completion(nil)
 		}
 	}
@@ -99,7 +104,7 @@ public final class RealmFeedStore: FeedStore {
 		try! writeToRealm { realm in
 			guard let realm = realm else { return completion(nil) }
 
-			clearOld(from: realm)
+			realm.deleteAll()
 
 			for image in feed {
 				realm.add(RealmFeedStoreCachedFeedImage.create(from: image, at: timestamp))
@@ -123,9 +128,5 @@ public final class RealmFeedStore: FeedStore {
 			let feedImages = Array(cached.map(\.localFeedImage))
 			completion(.found(feed: feedImages, timestamp: timestamp))
 		}
-	}
-	
-	private func clearOld(from realm: Realm) {
-		realm.deleteAll()
 	}
 }
