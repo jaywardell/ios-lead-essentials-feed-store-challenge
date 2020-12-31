@@ -100,63 +100,6 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 		assertThatSideEffectsRunSerially(on: sut)
 	}
 	
-	// - MARK: Helpers
-	
-	private func makeSUT(at fileURL: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
-		let fileURL = fileURL ?? testSpecificStoreURL()
-		let sut = RealmFeedStore(fileURL)
-		trackForMemoryLeaks(sut, file: file, line: line)
-		return sut
-	}
-	
-	func trackForMemoryLeaks(_ instance: AnyObject, file: StaticString = #filePath, line: UInt = #line) {
-		addTeardownBlock { [weak instance] in
-			XCTAssertNil(instance, "\(String(describing: instance)) was never deallocated.", file: file, line: line)
-		}
-	}
-	
-	private func testSpecificStoreURL() -> URL {
-		let out = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self)).realm")
-		return out
-	}
-
-	private func testSpecificReadOnlyStoreURL() -> URL {
-		let out = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self))_readonly.realm")
-		return out
-	}
-
-	
-	private func setupEmptyStoreState() {
-		clearRealmFiles(at: testSpecificStoreURL())
-	}
-	
-	private func undoStoreSideEffects() {
-		clearRealmFiles(at: testSpecificStoreURL())
-	}
-	
-	private func clearRealmFiles(at realmURL: URL) {
-		let realmURLs = [
-			realmURL,
-			realmURL.appendingPathExtension("lock"),
-			realmURL.appendingPathExtension("note"),
-			realmURL.appendingPathExtension("management")
-		]
-		for URL in realmURLs {
-			do {
-				try FileManager.default.removeItem(at: URL)
-			} catch {
-				// handle error
-			}
-		}
-	}
-
-	private func invalidStoreURL() -> URL {
-		URL(string: "invalid://store-url")!
-	}
-
-	private func cachesDirectory() -> URL {
-		FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
-	}
 
 }
 
@@ -172,7 +115,7 @@ extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_deliversFailureOnRetrievalError() {
 		
-		// if there's already invalid data there, then the realm will return an error
+		// if there's already invalid data there, then the realm will return an error when it tries to read
 		try! "not valid realm data".write(to: testSpecificStoreURL(), atomically: false, encoding: .utf8)
 		let sut = makeSUT(at: testSpecificStoreURL())
 
@@ -181,7 +124,7 @@ extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_hasNoSideEffectsOnFailure() {
 
-		// if there's already invalid data there, then the realm will return an error
+		// if there's already invalid data there, then the realm will return an error when it tries to read
 		try! "not valid realm data".write(to: testSpecificStoreURL(), atomically: false, encoding: .utf8)
 		let sut = makeSUT(at: testSpecificStoreURL())
 
@@ -189,24 +132,36 @@ extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 	}
 
 	func test_retrieve_deliversFailureOnRetrievalError_forPermissionsError() {
-		let sut = makeSUT(at: cachesDirectory())
+		
+		// if the current user doesn't have permission to read the store url passed in,
+		// then the realm will return an error when it tries to read
+		let sut = makeSUT(at: noPermissionsStoreURL())
 
 		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
 	}
 
 	func test_retrieve_hasNoSideEffectsOnFailure_forPermissionsError() {
-		let sut = makeSUT(at: cachesDirectory())
+
+		// if the current user doesn't have permission to read the store url passed in,
+		// then the realm will return an error when it tries to read
+		let sut = makeSUT(at: noPermissionsStoreURL())
 
 		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
 	}
 
 	func test_retrieve_deliversFailureOnRetrievalError_forInvalidURL() {
+
+		// if the store url is invalid,
+		// then the realm will return an error when it tries to read
 		let sut = makeSUT(at: invalidStoreURL())
 
 		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
 	}
 
 	func test_retrieve_hasNoSideEffectsOnFailure_forInvalidURL() {
+
+		// if the store url is invalid,
+		// then the realm will return an error when it tries to read
 		let sut = makeSUT(at: invalidStoreURL())
 
 		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
@@ -292,6 +247,68 @@ extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
 		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
 		
 		clearRealmFiles(at: testSpecificReadOnlyStoreURL())
+	}
+
+}
+
+// MARK:- Helpers
+
+extension FeedStoreChallengeTests {
+	
+	private func makeSUT(at fileURL: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
+		let fileURL = fileURL ?? testSpecificStoreURL()
+		let sut = RealmFeedStore(fileURL)
+		trackForMemoryLeaks(sut, file: file, line: line)
+		return sut
+	}
+	
+	func trackForMemoryLeaks(_ instance: AnyObject, file: StaticString = #filePath, line: UInt = #line) {
+		addTeardownBlock { [weak instance] in
+			XCTAssertNil(instance, "\(String(describing: instance)) was never deallocated.", file: file, line: line)
+		}
+	}
+	
+	private func testSpecificStoreURL() -> URL {
+		let out = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self)).realm")
+		return out
+	}
+
+	private func testSpecificReadOnlyStoreURL() -> URL {
+		let out = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self))_readonly.realm")
+		return out
+	}
+
+	
+	private func setupEmptyStoreState() {
+		clearRealmFiles(at: testSpecificStoreURL())
+	}
+	
+	private func undoStoreSideEffects() {
+		clearRealmFiles(at: testSpecificStoreURL())
+	}
+	
+	private func clearRealmFiles(at realmURL: URL) {
+		let realmURLs = [
+			realmURL,
+			realmURL.appendingPathExtension("lock"),
+			realmURL.appendingPathExtension("note"),
+			realmURL.appendingPathExtension("management")
+		]
+		for URL in realmURLs {
+			do {
+				try FileManager.default.removeItem(at: URL)
+			} catch {
+				// handle error
+			}
+		}
+	}
+
+	private func invalidStoreURL() -> URL {
+		URL(string: "invalid://store-url")!
+	}
+
+	private func noPermissionsStoreURL() -> URL {
+		FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
 	}
 
 }
