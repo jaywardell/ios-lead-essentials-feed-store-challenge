@@ -171,12 +171,30 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_deliversFailureOnRetrievalError() {
-		let sut = makeSUT(at: cachesDirectory())
+		
+		// if there's already invalid data there, then the realm will return an error
+		try! "not valid realm data".write(to: testSpecificStoreURL(), atomically: false, encoding: .utf8)
+		let sut = makeSUT(at: testSpecificStoreURL())
 
 		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
 	}
 
 	func test_retrieve_hasNoSideEffectsOnFailure() {
+
+		// if there's already invalid data there, then the realm will return an error
+		try! "not valid realm data".write(to: testSpecificStoreURL(), atomically: false, encoding: .utf8)
+		let sut = makeSUT(at: testSpecificStoreURL())
+
+		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
+	}
+
+	func test_retrieve_deliversFailureOnRetrievalError_forPermissionsError() {
+		let sut = makeSUT(at: cachesDirectory())
+
+		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
+	}
+
+	func test_retrieve_hasNoSideEffectsOnFailure_forPermissionsError() {
 		let sut = makeSUT(at: cachesDirectory())
 
 		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
