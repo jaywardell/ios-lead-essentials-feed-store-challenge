@@ -4,8 +4,26 @@
 
 import XCTest
 import FeedStoreChallenge
+import RealmSwift
 
 class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
+	
+	override func setUp() {
+		let realmURL = Realm.Configuration.defaultConfiguration.fileURL!
+		let realmURLs = [
+			realmURL,
+			realmURL.appendingPathExtension("lock"),
+			realmURL.appendingPathExtension("note"),
+			realmURL.appendingPathExtension("management")
+		]
+		for URL in realmURLs {
+			do {
+				try FileManager.default.removeItem(at: URL)
+			} catch {
+				// handle error
+			}
+		}
+	}
 	
 	//  ***********************
 	//
@@ -32,9 +50,9 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	}
 	
 	func test_retrieve_deliversFoundValuesOnNonEmptyCache() {
-		//		let sut = makeSUT()
-		//
-		//		assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on: sut)
+				let sut = makeSUT()
+		
+				assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on: sut)
 	}
 	
 	func test_retrieve_hasNoSideEffectsOnNonEmptyCache() {
