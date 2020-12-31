@@ -206,7 +206,16 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 
 		// In order to test retrieval after a failed insert
 		// we need an existing realm file that the retrieve can read
-		// but we need it to be emoty when insert() is called
+		// but we need it to be empty when insert() is called
+		writeEmptyRealmFile(at: testSpecificStoreURL())
+
+		// trying to insert into a realm that is readonly will cause an error
+		let sut = makeSUT(readonly: true)
+		
+		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
+	}
+
+	private func writeEmptyRealmFile(at fileURL: URL) {
 		
 		// create an existing realm at the standard test location
 		// and write to it, but leave it empty
@@ -222,13 +231,8 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 			exp2.fulfill()
 		}
 		wait(for: [exp1, exp2], timeout: 1.0)
-
-		// trying to insert into a realm that is readonly will cause an error
-		let sut = makeSUT(readonly: true)
-		
-		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
 	}
-
+	
 }
 
 //extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
