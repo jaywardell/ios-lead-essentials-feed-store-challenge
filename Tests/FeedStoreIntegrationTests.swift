@@ -27,9 +27,9 @@ class FeedStoreIntegrationTests: XCTestCase {
 	}
 	
 	func test_retrieve_deliversEmptyOnEmptyCache() {
-		//        let sut = makeSUT()
-		//
-		//        expect(sut, toRetrieve: .empty)
+		let sut = makeSUT()
+		
+		expect(sut, toRetrieve: .empty)
 	}
 	
 	func test_retrieve_deliversFeedInsertedOnAnotherInstance() {
@@ -71,16 +71,46 @@ class FeedStoreIntegrationTests: XCTestCase {
 	
 	// - MARK: Helpers
 	
-	private func makeSUT() -> FeedStore {
-		fatalError("Must be implemented")
+	private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
+		let fileURL = testSpecificStoreURL()
+		let sut = RealmFeedStore(fileURL)
+		trackForMemoryLeaks(sut, file: file, line: line)
+		return sut
 	}
 	
+	func trackForMemoryLeaks(_ instance: AnyObject, file: StaticString = #filePath, line: UInt = #line) {
+		addTeardownBlock { [weak instance] in
+			XCTAssertNil(instance, "\(String(describing: instance)) was never deallocated.", file: file, line: line)
+		}
+	}
+
+	private func testSpecificStoreURL() -> URL {
+		let out = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self)).realm")
+		return out
+	}
+
 	private func setupEmptyStoreState() {
-		
+		clearRealmFiles(at: testSpecificStoreURL())
 	}
 	
 	private func undoStoreSideEffects() {
-		
+		clearRealmFiles(at: testSpecificStoreURL())
 	}
 	
+	private func clearRealmFiles(at realmURL: URL) {
+		let realmURLs = [
+			realmURL,
+			realmURL.appendingPathExtension("lock"),
+			realmURL.appendingPathExtension("note"),
+			realmURL.appendingPathExtension("management")
+		]
+		for URL in realmURLs {
+			do {
+				try FileManager.default.removeItem(at: URL)
+			} catch {
+				// handle error
+			}
+		}
+	}
+
 }
