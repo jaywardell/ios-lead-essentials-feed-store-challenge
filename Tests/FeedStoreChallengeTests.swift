@@ -41,9 +41,9 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	}
 	
 	func test_retrieve_deliversFoundValuesOnNonEmptyCache() {
-				let sut = makeSUT()
+		let sut = makeSUT()
 		
-				assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on: sut)
+		assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on: sut)
 	}
 	
 	func test_retrieve_hasNoSideEffectsOnNonEmptyCache() {
@@ -59,9 +59,9 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	}
 	
 	func test_insert_deliversNoErrorOnNonEmptyCache() {
-		//		let sut = makeSUT()
-		//
-		//		assertThatInsertDeliversNoErrorOnNonEmptyCache(on: sut)
+		let sut = makeSUT()
+		
+		assertThatInsertDeliversNoErrorOnNonEmptyCache(on: sut)
 	}
 	
 	func test_insert_overridesPreviouslyInsertedCacheValues() {
