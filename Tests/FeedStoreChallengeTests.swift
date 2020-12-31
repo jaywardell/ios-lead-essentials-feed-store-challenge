@@ -200,8 +200,7 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 
 	func test_insert_deliversErrorOnInsertionError() {
 
-		// trying to write into a realm that is readonly
-		// will cause an error
+		// trying to write into a realm that is readonly will cause an error
 		let sut = RealmFeedStore(testSpecificReadOnlyStoreURL(), readOnly: true)
 		trackForMemoryLeaks(sut)
 
@@ -246,18 +245,35 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 	
 }
 
-//extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
-//
-//	func test_delete_deliversErrorOnDeletionError() {
-////		let sut = makeSUT()
-////
-////		assertThatDeleteDeliversErrorOnDeletionError(on: sut)
-//	}
-//
-//	func test_delete_hasNoSideEffectsOnDeletionError() {
-////		let sut = makeSUT()
-////
-////		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
-//	}
-//
-//}
+extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
+
+	func test_delete_deliversErrorOnDeletionError() {
+
+		// trying to delete from a realm that is readonly will cause an error
+		let sut = RealmFeedStore(testSpecificReadOnlyStoreURL(), readOnly: true)
+		trackForMemoryLeaks(sut)
+
+		assertThatDeleteDeliversErrorOnDeletionError(on: sut)
+		
+		clearRealmFiles(at: testSpecificReadOnlyStoreURL())
+	}
+
+	func test_delete_hasNoSideEffectsOnDeletionError() {
+
+		// In order to test retrieval after a failed deletion
+		// we need an existing realm file that the retrieve can read
+		// but we need it to be empty when insert() is called
+		writeEmptyRealmFile(at: testSpecificReadOnlyStoreURL())
+		
+		// trying to delete from a realm that is readonly will cause an error
+		let sut = RealmFeedStore(testSpecificReadOnlyStoreURL(), readOnly: true)
+		trackForMemoryLeaks(sut)
+
+		print(testSpecificReadOnlyStoreURL())
+		
+		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
+		
+		clearRealmFiles(at: testSpecificReadOnlyStoreURL())
+	}
+
+}
