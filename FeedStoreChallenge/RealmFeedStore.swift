@@ -56,14 +56,26 @@ public final class RealmFeedStore: FeedStore {
 	let queue: DispatchQueue
 	public init(_ fileURL: URL) {
 		self.configuration = Realm.Configuration(fileURL: fileURL)
-		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated)
+		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated, autoreleaseFrequency: .workItem)
 	}
-		
+	
 	private func accessRealm(_ callback: @escaping (Realm?)->()) throws {
 		queue.async {
 			do {
-				try autoreleasepool { [unowned self] in
-					let realm = try Realm(configuration: self.configuration, queue: self.queue)
+				let realm = try Realm(configuration: self.configuration)
+				callback(realm)
+			}
+			catch {
+				
+			}
+		}
+	}
+	
+	private func writeToRealm(_ callback: @escaping (Realm?)->()) throws {
+		queue.async { [unowned self] in
+			do {
+				let realm = try Realm(configuration: self.configuration, queue: self.queue)
+				try realm.write {
 					callback(realm)
 				}
 			}
@@ -73,22 +85,6 @@ public final class RealmFeedStore: FeedStore {
 		}
 	}
 	
-	private func writeToRealm(_ callback: @escaping (Realm?)->()) throws {
-		queue.async {
-			do {
-				try autoreleasepool { [unowned self] in
-					let realm = try Realm(configuration: configuration, queue: queue)
-					try realm.write {
-						callback(realm)
-					}
-				}
-			}
-			catch {
-				
-			}
-		}
-	}
-
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
 
 		try! writeToRealm { realm in

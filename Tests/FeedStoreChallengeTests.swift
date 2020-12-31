@@ -102,8 +102,16 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	
 	// - MARK: Helpers
 	
-	private func makeSUT() -> FeedStore {
-		RealmFeedStore(test_specific_storeURL())
+	private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
+		let sut = RealmFeedStore(test_specific_storeURL())
+		trackForMemoryLeaks(sut, file: file, line: line)
+		return sut
+	}
+	
+	func trackForMemoryLeaks(_ instance: AnyObject, file: StaticString = #filePath, line: UInt = #line) {
+		addTeardownBlock { [weak instance] in
+			XCTAssertNil(instance, "\(String(describing: instance)) was never deallocated.", file: file, line: line)
+		}
 	}
 	
 	private func test_specific_storeURL() -> URL {
