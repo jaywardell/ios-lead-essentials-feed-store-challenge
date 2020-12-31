@@ -57,7 +57,7 @@ public final class RealmFeedStore: FeedStore {
 		self.realm = try! Realm()
 	}
 	
-
+	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
 		fatalError()
 	}
@@ -74,20 +74,11 @@ public final class RealmFeedStore: FeedStore {
 	}
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
-		let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)
-		if cached.count > 0 {
-			let feedImages = cached.map {
-				$0.localFeedImage
-			}
-			
-			let timestamp = realm.objects(RealmFeedStoreTimestamp.self).first!.timestamp!			
-			
-			completion(.found(feed: Array(feedImages), timestamp: timestamp))
-		}
-		else {
-			completion(.empty)
-		}
+
+		guard let timestamp = realm.objects(RealmFeedStoreTimestamp.self).first?.timestamp else { return completion(.empty) }
+
+		let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)		
+		let feedImages = Array(cached.map(\.localFeedImage))
+		completion(.found(feed: feedImages, timestamp: timestamp))
 	}
-	
-	
 }
