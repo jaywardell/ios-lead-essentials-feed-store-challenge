@@ -102,8 +102,9 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	
 	// - MARK: Helpers
 	
-	private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
-		let sut = RealmFeedStore(test_specific_storeURL())
+	private func makeSUT(at fileURL: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
+		let fileURL = fileURL ?? testSpecificStoreURL()
+		let sut = RealmFeedStore(fileURL)
 		trackForMemoryLeaks(sut, file: file, line: line)
 		return sut
 	}
@@ -114,18 +115,18 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 		}
 	}
 	
-	private func test_specific_storeURL() -> URL {
+	private func testSpecificStoreURL() -> URL {
 		let out = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self)).realm")
 		return out
 	}
 
 	
 	private func setupEmptyStoreState() {
-		clearRealmFiles(at: test_specific_storeURL())
+		clearRealmFiles(at: testSpecificStoreURL())
 	}
 	
 	private func undoStoreSideEffects() {
-		clearRealmFiles(at: test_specific_storeURL())
+		clearRealmFiles(at: testSpecificStoreURL())
 	}
 	
 	private func clearRealmFiles(at realmURL: URL) {
@@ -144,6 +145,10 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 		}
 	}
 
+	private func invalidStoreURL() -> URL {
+		URL(string: "invalid://store-url")!
+	}
+
 }
 
 //  ***********************
@@ -154,21 +159,21 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 //
 //  ***********************
 
-//extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
-//
-//	func test_retrieve_deliversFailureOnRetrievalError() {
-////		let sut = makeSUT()
-////
-////		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
-//	}
-//
-//	func test_retrieve_hasNoSideEffectsOnFailure() {
-////		let sut = makeSUT()
-////
-////		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
-//	}
-//
-//}
+extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
+
+	func test_retrieve_deliversFailureOnRetrievalError() {
+		let sut = makeSUT(at: invalidStoreURL())
+
+		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
+	}
+
+	func test_retrieve_hasNoSideEffectsOnFailure() {
+		let sut = makeSUT(at: invalidStoreURL())
+
+		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
+	}
+
+}
 
 //extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 //

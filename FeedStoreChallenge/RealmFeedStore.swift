@@ -59,14 +59,14 @@ public final class RealmFeedStore: FeedStore {
 		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated, autoreleaseFrequency: .workItem)
 	}
 	
-	private func accessRealm(_ callback: @escaping (Realm?)->()) throws {
+	private func accessRealm(_ callback: @escaping (Result<Realm, Error>)->()) {
 		queue.async {
 			do {
 				let realm = try Realm(configuration: self.configuration)
-				callback(realm)
+				callback(.success(realm))
 			}
 			catch {
-				
+				callback(.failure(error))
 			}
 		}
 	}
@@ -112,17 +112,19 @@ public final class RealmFeedStore: FeedStore {
 	}
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
-
-		try! accessRealm { realm in
-			guard let realm = realm else {
-				return completion(.empty)
+		
+		accessRealm { result in
+			switch result {
+			case .failure(let error):
+				return completion(.failure(error))
+			
+			case .success(let realm):
+				guard let timestamp = realm.objects(RealmFeedStoreTimestamp.self).last?.timestamp else { return completion(.empty) }
+				
+				let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)
+				let feedImages = Array(cached.map(\.localFeedImage))
+				completion(.found(feed: feedImages, timestamp: timestamp))
 			}
-			
-			guard let timestamp = realm.objects(RealmFeedStoreTimestamp.self).last?.timestamp else { return completion(.empty) }
-			
-			let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)
-			let feedImages = Array(cached.map(\.localFeedImage))
-			completion(.found(feed: feedImages, timestamp: timestamp))
 		}
 	}
 }
