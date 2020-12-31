@@ -9,14 +9,16 @@
 import Foundation
 import RealmSwift
 
-class CachedFeedImage: Object {
-	@objc dynamic var id: String?
-	@objc dynamic var desc: String?
-	@objc dynamic var location: String?
-	@objc dynamic var url: String?
-	@objc dynamic var timestamp: Date?
+/// This is an internal type to RealmFeedStore
+/// It should not be used by any code outside this file
+final class CachedFeedImage: Object {
+	@objc fileprivate dynamic var id: String?
+	@objc fileprivate dynamic var desc: String?
+	@objc fileprivate dynamic var location: String?
+	@objc fileprivate dynamic var url: String?
+	@objc fileprivate dynamic var timestamp: Date?
 
-	class func createFeedImage(from localFeedImage: LocalFeedImage, at timestamp: Date) -> CachedFeedImage {
+	fileprivate class func createFeedImage(from localFeedImage: LocalFeedImage, at timestamp: Date) -> CachedFeedImage {
 		
 		let out = CachedFeedImage()
 		out.id = localFeedImage.id.uuidString
@@ -29,7 +31,7 @@ class CachedFeedImage: Object {
 		return out
 	}
 		
-	var localFeedImage: LocalFeedImage {
+	fileprivate var localFeedImage: LocalFeedImage {
 		LocalFeedImage(id: UUID(uuidString: id!)!, description: desc, location: location, url: URL(string: url!)!)
 	}
 }
