@@ -59,16 +59,21 @@ public final class RealmFeedStore: FeedStore {
 		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated)
 	}
 		
-	private func accessRealm(_ callback: (Realm)->()) throws {
-		try queue.sync {
-			try autoreleasepool {
-				let realm = try Realm(configuration: configuration, queue: queue)
-				callback(realm)
+	private func accessRealm(_ callback: @escaping (Realm?)->()) throws {
+		queue.async {
+			do {
+				try autoreleasepool { [unowned self] in
+					let realm = try Realm(configuration: self.configuration, queue: self.queue)
+					callback(realm)
+				}
+			}
+			catch {
+				
 			}
 		}
 	}
 	
-	private func writeToRealm(_ callback: (Realm)->()) throws {
+	private func writeToRealm(_ callback: (Realm?)->()) throws {
 		try queue.sync {
 			try autoreleasepool {
 				let realm = try Realm(configuration: configuration, queue: queue)
@@ -82,6 +87,8 @@ public final class RealmFeedStore: FeedStore {
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
 
 		try! writeToRealm { realm in
+			guard let realm = realm else { return completion(nil) }
+
 			clearOld(from: realm)
 			completion(nil)
 		}
@@ -90,11 +97,13 @@ public final class RealmFeedStore: FeedStore {
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
 		
 		try! writeToRealm { realm in
+			guard let realm = realm else { return completion(nil) }
+
 			clearOld(from: realm)
+
 			for image in feed {
 				realm.add(RealmFeedStoreCachedFeedImage.create(from: image, at: timestamp))
 			}
-			
 			realm.add(RealmFeedStoreTimestamp.create(from: timestamp))
 			
 			completion(nil)
@@ -104,6 +113,10 @@ public final class RealmFeedStore: FeedStore {
 	public func retrieve(completion: @escaping RetrievalCompletion) {
 
 		try! accessRealm { realm in
+			guard let realm = realm else {
+				return completion(.empty)
+			}
+			
 			guard let timestamp = realm.objects(RealmFeedStoreTimestamp.self).last?.timestamp else { return completion(.empty) }
 			
 			let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)
