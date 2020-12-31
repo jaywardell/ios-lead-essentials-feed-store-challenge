@@ -53,8 +53,9 @@ final class RealmFeedStoreTimestamp: Object {
 public final class RealmFeedStore: FeedStore {
 	
 	let realm: Realm
-	public init() {
-		self.realm = try! Realm()
+	public init(_ fileURL: URL) {
+		let configuration = Realm.Configuration(fileURL: fileURL)
+		self.realm = try! Realm(configuration: configuration)
 	}
 	
 	

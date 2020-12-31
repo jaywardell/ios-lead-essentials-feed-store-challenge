@@ -103,19 +103,24 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	// - MARK: Helpers
 	
 	private func makeSUT() -> FeedStore {
-		RealmFeedStore()
+		RealmFeedStore(test_specific_storeURL())
 	}
 	
+	private func test_specific_storeURL() -> URL {
+		let out = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self)).realm")
+		return out
+	}
+
+	
 	private func setupEmptyStoreState() {
-		clearRealmFiles()
+		clearRealmFiles(at: test_specific_storeURL())
 	}
 	
 	private func undoStoreSideEffects() {
-		clearRealmFiles()
+		clearRealmFiles(at: test_specific_storeURL())
 	}
 	
-	private func clearRealmFiles() {
-		let realmURL = Realm.Configuration.defaultConfiguration.fileURL!
+	private func clearRealmFiles(at realmURL: URL) {
 		let realmURLs = [
 			realmURL,
 			realmURL.appendingPathExtension("lock"),
