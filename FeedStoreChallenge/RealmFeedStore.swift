@@ -54,8 +54,8 @@ public final class RealmFeedStore: FeedStore {
 	
 	let configuration: Realm.Configuration
 	let queue: DispatchQueue
-	public init(_ fileURL: URL) {
-		self.configuration = Realm.Configuration(fileURL: fileURL)
+	public init(_ fileURL: URL, readOnly: Bool = false) {
+		self.configuration = Realm.Configuration(fileURL: fileURL, readOnly: readOnly)
 		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated, autoreleaseFrequency: .workItem)
 	}
 	
@@ -71,43 +71,51 @@ public final class RealmFeedStore: FeedStore {
 		}
 	}
 	
-	private func writeToRealm(_ callback: @escaping (Realm?)->()) throws {
+	private func writeToRealm(_ callback: @escaping (Result<Realm, Error>)->()) throws {
 		queue.async { [unowned self] in
 			do {
 				let realm = try Realm(configuration: self.configuration, queue: self.queue)
 				try realm.write {
-					callback(realm)
+					callback(.success(realm))
 				}
 			}
 			catch {
-				
+				callback(.failure(error))
 			}
 		}
 	}
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
 
-		try! writeToRealm { realm in
-			guard let realm = realm else { return completion(nil) }
-
-			realm.deleteAll()
-			completion(nil)
+		try! writeToRealm {
+			switch $0 {
+			case .failure(let error):
+				completion(error)
+			
+			case .success(let realm):
+				realm.deleteAll()
+				completion(nil)
+			}
 		}
 	}
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
 		
-		try! writeToRealm { realm in
-			guard let realm = realm else { return completion(nil) }
-
-			realm.deleteAll()
-
-			for image in feed {
-				realm.add(RealmFeedStoreCachedFeedImage.create(from: image, at: timestamp))
+		try! writeToRealm {
+			switch $0 {
+			case .failure(let error):
+				completion(error)
+				
+			case .success(let realm):
+				realm.deleteAll()
+				
+				for image in feed {
+					realm.add(RealmFeedStoreCachedFeedImage.create(from: image, at: timestamp))
+				}
+				realm.add(RealmFeedStoreTimestamp.create(from: timestamp))
+				
+				completion(nil)
 			}
-			realm.add(RealmFeedStoreTimestamp.create(from: timestamp))
-			
-			completion(nil)
 		}
 	}
 	

@@ -102,9 +102,9 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	
 	// - MARK: Helpers
 	
-	private func makeSUT(at fileURL: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
+	private func makeSUT(at fileURL: URL? = nil, readonly: Bool = false, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
 		let fileURL = fileURL ?? testSpecificStoreURL()
-		let sut = RealmFeedStore(fileURL)
+		let sut = RealmFeedStore(fileURL, readOnly: readonly)
 		trackForMemoryLeaks(sut, file: file, line: line)
 		return sut
 	}
@@ -191,21 +191,45 @@ extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 
 }
 
-//extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
-//
-//	func test_insert_deliversErrorOnInsertionError() {
-////		let sut = makeSUT()
-////
-////		assertThatInsertDeliversErrorOnInsertionError(on: sut)
-//	}
-//
-//	func test_insert_hasNoSideEffectsOnInsertionError() {
-////		let sut = makeSUT()
-////
-////		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
-//	}
-//
-//}
+extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
+
+	func test_insert_deliversErrorOnInsertionError() {
+
+		// trying to write into a realm that is readonly
+		// will cause an error
+		let sut = makeSUT(readonly: true)
+
+		assertThatInsertDeliversErrorOnInsertionError(on: sut)
+	}
+
+	func test_insert_hasNoSideEffectsOnInsertionError() {
+
+		// In order to test retrieval after a failed insert
+		// we need an existing realm file that the retrieve can read
+		// but we need it to be emoty when insert() is called
+		
+		// create an existing realm at the standard test location
+		// and write to it, but leave it empty
+		// so that a file exists at the expected path
+		let existingRealm = RealmFeedStore(testSpecificStoreURL())
+		let exp1 = expectation(description: "Wait for dummy insertion")
+		existingRealm.insert(uniqueImageFeed(), timestamp: Date()) {_ in
+			exp1.fulfill()
+		}
+
+		let exp2 = expectation(description: "Wait for dummy deeltion")
+		existingRealm.deleteCachedFeed {_ in
+			exp2.fulfill()
+		}
+		wait(for: [exp1, exp2], timeout: 1.0)
+
+		// trying to insert into a realm that is readonly will cause an error
+		let sut = makeSUT(readonly: true)
+		
+		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
+	}
+
+}
 
 //extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
 //
