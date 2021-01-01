@@ -75,13 +75,11 @@ public final class RealmFeedStore: FeedStore {
 		queue.async { [unowned self] in
 			do {
 				let realm = try Realm(configuration: self.configuration, queue: self.queue)
-//				try realm.write {
 				try ObjectiveCExceptions.performTry {
 					realm.beginWrite()
 				}
 				callback(.success(realm))
 				try realm.commitWrite()
-//				}
 			}
 			catch {
 				callback(.failure(error))
