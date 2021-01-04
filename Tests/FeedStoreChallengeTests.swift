@@ -115,7 +115,6 @@ extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_deliversFailureOnRetrievalError() {
 		
-		// if there's already invalid data there, then the realm will return an error when it tries to read
 		try! "not valid realm data".write(to: testSpecificStoreURL(), atomically: false, encoding: .utf8)
 		let sut = makeSUT(at: testSpecificStoreURL())
 
@@ -124,7 +123,6 @@ extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_hasNoSideEffectsOnFailure() {
 
-		// if there's already invalid data there, then the realm will return an error when it tries to read
 		try! "not valid realm data".write(to: testSpecificStoreURL(), atomically: false, encoding: .utf8)
 		let sut = makeSUT(at: testSpecificStoreURL())
 
@@ -133,8 +131,6 @@ extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_deliversFailureOnRetrievalError_forPermissionsError() {
 		
-		// if the current user doesn't have permission to read the store url passed in,
-		// then the realm will return an error when it tries to read
 		let sut = makeSUT(at: noPermissionsStoreURL())
 
 		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
@@ -142,8 +138,6 @@ extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_hasNoSideEffectsOnFailure_forPermissionsError() {
 
-		// if the current user doesn't have permission to read the store url passed in,
-		// then the realm will return an error when it tries to read
 		let sut = makeSUT(at: noPermissionsStoreURL())
 
 		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
@@ -151,8 +145,6 @@ extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_deliversFailureOnRetrievalError_forInvalidURL() {
 
-		// if the store url is invalid,
-		// then the realm will return an error when it tries to read
 		let sut = makeSUT(at: invalidStoreURL())
 
 		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
@@ -160,8 +152,6 @@ extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_hasNoSideEffectsOnFailure_forInvalidURL() {
 
-		// if the store url is invalid,
-		// then the realm will return an error when it tries to read
 		let sut = makeSUT(at: invalidStoreURL())
 
 		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
