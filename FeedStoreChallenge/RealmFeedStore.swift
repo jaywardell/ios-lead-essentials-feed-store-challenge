@@ -41,9 +41,6 @@ final class RealmFeedStoreCachedFeedImage: Object {
 	}
 }
 
-/// This is an internal type to RealmFeedStore
-/// It should not be used by any code outside this file
-// we would make it fileprivate, but Realm complains with an error
 final class RealmFeedStoreTimestamp: Object {
 	@objc fileprivate dynamic var timestamp: Date
 	
