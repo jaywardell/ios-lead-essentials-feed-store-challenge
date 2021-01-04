@@ -258,7 +258,7 @@ extension FeedStoreChallengeTests {
 		clearRealmFiles(at: testSpecificStoreURL())
 	}
 	
-	private func clearRealmFiles(at realmURL: URL) {
+	private func clearRealmFiles(at realmURL: URL, file: StaticString = #filePath, line: UInt = #line) {
 		
 		// taken from https://realm.io/docs/swift/latest/#migrations subsection "Deleting Realm files"
 		let realmURLs = [
@@ -268,10 +268,8 @@ extension FeedStoreChallengeTests {
 			realmURL.appendingPathExtension("management")
 		]
 		for URL in realmURLs {
-			do {
-				try FileManager.default.removeItem(at: URL)
-			} catch {
-				// handle error
+			if FileManager.default.fileExists(atPath: URL.path) {
+				XCTAssertNoThrow(try FileManager.default.removeItem(at: URL), file: file, line: line)
 			}
 		}
 	}
