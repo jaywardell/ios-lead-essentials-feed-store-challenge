@@ -74,10 +74,17 @@ public final class RealmFeedStore: FeedStore {
 		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated, autoreleaseFrequency: .workItem)
 	}
 	
+	private var _realm: Realm?
+	private func getRealm() throws -> Realm {
+		if let existing = _realm { return existing }
+		_realm = try Realm(configuration: self.configuration, queue: queue)
+		return _realm!
+	}
+	
 	private func accessRealm(_ callback: @escaping (Result<Realm, Error>)->()) {
-		queue.async {
+		queue.async { [self] in
 			do {
-				let realm = try Realm(configuration: self.configuration)
+				let realm = try getRealm()
 				callback(.success(realm))
 			}
 			catch {
@@ -89,7 +96,7 @@ public final class RealmFeedStore: FeedStore {
 	private func writeToRealm(_ callback: @escaping (Result<Realm, Error>)->()) {
 		queue.async { [unowned self] in
 			do {
-				let realm = try Realm(configuration: self.configuration, queue: self.queue)
+				let realm = try getRealm()
 				try ObjectiveCExceptions.performTry {
 					realm.beginWrite()
 				}
