@@ -23,7 +23,7 @@ final class RealmFeedStoreCachedFeedImage: Object {
 		self.url = ""
 	}
 	
-	fileprivate class func create(from localFeedImage: LocalFeedImage, at timestamp: Date) -> RealmFeedStoreCachedFeedImage {
+	fileprivate class func create(from localFeedImage: LocalFeedImage) -> RealmFeedStoreCachedFeedImage {
 		
 		let out = RealmFeedStoreCachedFeedImage()
 		out.id = localFeedImage.id.uuidString
@@ -117,7 +117,7 @@ public final class RealmFeedStore: FeedStore {
 				realm.deleteAll()
 				
 				for image in feed {
-					realm.add(RealmFeedStoreCachedFeedImage.create(from: image, at: timestamp))
+					realm.add(RealmFeedStoreCachedFeedImage.create(from: image))
 				}
 				realm.add(RealmFeedStoreTimestamp.create(from: timestamp))
 				
