@@ -21,6 +21,7 @@ final class RealmFeedStoreCachedFeedImage: Object {
 	private override init() {
 		self.id = ""
 		self.url = ""
+		super.init()
 	}
 	
 	fileprivate class func create(from localFeedImage: LocalFeedImage) -> RealmFeedStoreCachedFeedImage {
@@ -47,7 +48,12 @@ final class RealmFeedStoreCachedFeedImage: Object {
 /// It should not be used by any code outside this file
 // we would make it fileprivate, but Realm complains with an error
 final class RealmFeedStoreTimestamp: Object {
-	@objc fileprivate dynamic var timestamp: Date?
+	@objc fileprivate dynamic var timestamp: Date
+	
+	private override init() {
+		timestamp = Date.distantPast
+		super.init()
+	}
 	
 	fileprivate class func create(from timestamp: Date) -> RealmFeedStoreTimestamp {
 		
