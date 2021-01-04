@@ -93,14 +93,15 @@ public final class RealmFeedStore: FeedStore {
 	}
 	
 	private func writeToRealm(_ callback: @escaping (Result<Realm, Error>)->()) {
-		queue.async { [unowned self] in
+		queue.async { [weak self] in
 			do {
-				let realm = try getRealm()
-				try ObjectiveCExceptions.performTry {
-					realm.beginWrite()
+				if let realm = try self?.getRealm() {
+					try ObjectiveCExceptions.performTry {
+						realm.beginWrite()
+					}
+					callback(.success(realm))
+					try realm.commitWrite()
 				}
-				callback(.success(realm))
-				try realm.commitWrite()
 			}
 			catch {
 				callback(.failure(error))
