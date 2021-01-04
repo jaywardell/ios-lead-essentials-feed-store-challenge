@@ -34,8 +34,12 @@ final class RealmFeedStoreCachedFeedImage: Object {
 		return out
 	}
 		
-	fileprivate var localFeedImage: LocalFeedImage {
-		LocalFeedImage(id: UUID(uuidString: id)!, description: desc, location: location, url: URL(string: url)!)
+	fileprivate var localFeedImage: LocalFeedImage? {
+		guard let uuid = UUID(uuidString: id),
+			  let url = URL(string: url) else {
+			 return nil
+		}
+		return LocalFeedImage(id: uuid, description: desc, location: location, url: url)
 	}
 }
 
@@ -137,7 +141,7 @@ public final class RealmFeedStore: FeedStore {
 				guard let timestamp = realm.objects(RealmFeedStoreTimestamp.self).last?.timestamp else { return completion(.empty) }
 				
 				let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)
-				let feedImages = Array(cached.map(\.localFeedImage))
+				let feedImages = Array(cached.map(\.localFeedImage)).compactMap { $0 }
 				completion(.found(feed: feedImages, timestamp: timestamp))
 			}
 		}
