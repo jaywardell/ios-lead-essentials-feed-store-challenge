@@ -172,8 +172,7 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 		// but we need it to be empty when insert() is called
 		//
 		// (we can't use an in-Memory Realm store for this
-		// because Realm calls an error when you try to retreive from an empty readonly In-Memory realm store.
-		// of course, who would ever do that)
+		// because Realm calls an error when you try to retreive from an empty readonly In-Memory realm store)
 		writeEmptyRealmFile(at: testSpecificStoreURL())
 
 		// trying to insert into a realm that is readonly will cause an error
