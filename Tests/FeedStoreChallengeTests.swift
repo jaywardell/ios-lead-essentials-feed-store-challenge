@@ -164,7 +164,7 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 
 		assertThatInsertDeliversErrorOnInsertionError(on: sut)
 		
-		clearRealmFiles(at: testSpecificReadOnlyStoreURL())
+		clearRealmFiles(at: testSpecificStoreURL())
 	}
 
 	func test_insert_hasNoSideEffectsOnInsertionError() {
@@ -176,14 +176,14 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 		// (we can't use an in-Memory Realm store for this
 		// because Realm calls an error when you try to retreive from an empty readonly In-Memory realm store.
 		// of course, who would ever do that)
-		writeEmptyRealmFile(at: testSpecificReadOnlyStoreURL())
+		writeEmptyRealmFile(at: testSpecificStoreURL())
 
 		// trying to insert into a realm that is readonly will cause an error
-		let sut = makeSUT(at: testSpecificReadOnlyStoreURL(), readonly: true)
+		let sut = makeSUT(at: testSpecificStoreURL(), readonly: true)
 
 		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
 
-		clearRealmFiles(at: testSpecificReadOnlyStoreURL())
+		clearRealmFiles(at: testSpecificStoreURL())
 	}
 
 	private func writeEmptyRealmFile(at fileURL: URL) {
@@ -215,7 +215,7 @@ extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
 
 		assertThatDeleteDeliversErrorOnDeletionError(on: sut)
 		
-		clearRealmFiles(at: testSpecificReadOnlyStoreURL())
+		clearRealmFiles(at: testSpecificStoreURL())
 	}
 
 	func test_delete_hasNoSideEffectsOnDeletionError() {
@@ -227,16 +227,14 @@ extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
 		// (we can't use an in-Memory Realm store for this
 		// because Realm calls an error when you try to retreive from an empty readonly In-Memory realm store.
 		// of course, who would ever do that)
-		writeEmptyRealmFile(at: testSpecificReadOnlyStoreURL())
+		writeEmptyRealmFile(at: testSpecificStoreURL())
 		
 		// trying to delete from a realm that is readonly will cause an error
-		let sut = makeSUT(at: testSpecificReadOnlyStoreURL(), readonly: true)
-
-		print(testSpecificReadOnlyStoreURL())
+		let sut = makeSUT(at: testSpecificStoreURL(), readonly: true)
 		
 		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
 		
-		clearRealmFiles(at: testSpecificReadOnlyStoreURL())
+		clearRealmFiles(at: testSpecificStoreURL())
 	}
 
 }
@@ -267,12 +265,6 @@ extension FeedStoreChallengeTests {
 		let out = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self)).realm")
 		return out
 	}
-
-	private func testSpecificReadOnlyStoreURL() -> URL {
-		let out = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self))_readonly.realm")
-		return out
-	}
-
 	
 	private func setupEmptyStoreState() {
 		clearRealmFiles(at: testSpecificStoreURL())
