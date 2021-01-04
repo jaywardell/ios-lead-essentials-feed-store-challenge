@@ -130,28 +130,24 @@ extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
 	}
 
 	func test_retrieve_deliversFailureOnRetrievalError_forPermissionsError() {
-		
 		let sut = makeSUT(at: noPermissionsStoreURL())
 
 		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
 	}
 
 	func test_retrieve_hasNoSideEffectsOnFailure_forPermissionsError() {
-
 		let sut = makeSUT(at: noPermissionsStoreURL())
 
 		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
 	}
 
 	func test_retrieve_deliversFailureOnRetrievalError_forInvalidURL() {
-
 		let sut = makeSUT(at: invalidStoreURL())
 
 		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
 	}
 
 	func test_retrieve_hasNoSideEffectsOnFailure_forInvalidURL() {
-
 		let sut = makeSUT(at: invalidStoreURL())
 
 		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
