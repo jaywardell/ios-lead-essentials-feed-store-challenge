@@ -192,16 +192,8 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 		// and write to it, but leave it empty
 		// so that a file exists at the expected path
 		let existingRealm = RealmFeedStore(fileURL: fileURL)
-		let exp1 = expectation(description: "Wait for dummy insertion")
-		existingRealm.insert(uniqueImageFeed(), timestamp: Date()) {_ in
-			exp1.fulfill()
-		}
-
-		let exp2 = expectation(description: "Wait for dummy deeltion")
-		existingRealm.deleteCachedFeed {_ in
-			exp2.fulfill()
-		}
-		wait(for: [exp1, exp2], timeout: 1.0)
+		insert((feed: [], timestamp: Date()), to: existingRealm)
+		deleteCache(from: existingRealm)
 	}
 	
 }
