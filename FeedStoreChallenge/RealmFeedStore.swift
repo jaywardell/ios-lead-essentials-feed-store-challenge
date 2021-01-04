@@ -9,9 +9,6 @@
 import Foundation
 import RealmSwift
 
-/// This is an internal type to RealmFeedStore
-/// It should not be used by any code outside this file
-// we would make it fileprivate, but Realm complains with an error
 final class RealmFeedStoreCachedFeedImage: Object {
 	@objc fileprivate dynamic var id: String
 	@objc fileprivate dynamic var desc: String?
