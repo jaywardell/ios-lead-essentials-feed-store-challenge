@@ -4,6 +4,7 @@
 
 import XCTest
 import FeedStoreChallenge
+import RealmSwift
 
 class FeedStoreIntegrationTests: XCTestCase {
 	
@@ -99,18 +100,7 @@ class FeedStoreIntegrationTests: XCTestCase {
 	
 	private func clearRealmFiles(at realmURL: URL, file: StaticString = #filePath, line: UInt = #line) {
 		
-		// taken from https://realm.io/docs/swift/latest/#migrations subsection "Deleting Realm files"
-		let realmURLs = [
-			realmURL,
-			realmURL.appendingPathExtension("lock"),
-			realmURL.appendingPathExtension("note"),
-			realmURL.appendingPathExtension("management")
-		]
-		for URL in realmURLs {
-			if FileManager.default.fileExists(atPath: URL.path) {
-				XCTAssertNoThrow(try FileManager.default.removeItem(at: URL), file: file, line: line)
-			}
-		}
+		XCTAssertNoThrow(try Realm.deleteFiles(for: Realm.Configuration(fileURL: realmURL)))
 	}
 
 }
