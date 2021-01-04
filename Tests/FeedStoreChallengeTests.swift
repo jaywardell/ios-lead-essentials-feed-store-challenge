@@ -259,6 +259,8 @@ extension FeedStoreChallengeTests {
 	}
 	
 	private func clearRealmFiles(at realmURL: URL) {
+		
+		// taken from https://realm.io/docs/swift/latest/#migrations subsection "Deleting Realm files"
 		let realmURLs = [
 			realmURL,
 			realmURL.appendingPathExtension("lock"),
