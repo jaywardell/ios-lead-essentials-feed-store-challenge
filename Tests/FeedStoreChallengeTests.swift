@@ -256,8 +256,13 @@ extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
 extension FeedStoreChallengeTests {
 	
 	private func makeSUT(at fileURL: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
-		let fileURL = fileURL ?? testSpecificStoreURL()
-		let sut = RealmFeedStore(fileURL: fileURL)
+		let sut: RealmFeedStore
+		if let fileURL = fileURL {
+			sut = RealmFeedStore(fileURL: fileURL)
+		}
+		else {
+			sut = RealmFeedStore(inMemoryIdentifier: UUID().uuidString)
+		}
 		trackForMemoryLeaks(sut, file: file, line: line)
 		return sut
 	}

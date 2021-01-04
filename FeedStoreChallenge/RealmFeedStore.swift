@@ -74,6 +74,11 @@ public final class RealmFeedStore: FeedStore {
 		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated, autoreleaseFrequency: .workItem)
 	}
 	
+	public init(inMemoryIdentifier: String, readOnly: Bool = false) {
+		self.configuration = Realm.Configuration(inMemoryIdentifier: inMemoryIdentifier, readOnly: readOnly)
+		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated, autoreleaseFrequency: .workItem)
+	}
+
 	private var _realm: Realm?
 	private func getRealm() throws -> Realm {
 		if let existing = _realm { return existing }
