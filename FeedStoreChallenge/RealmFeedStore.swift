@@ -91,16 +91,20 @@ public final class RealmFeedStore: FeedStore {
 			}
 		}
 	}
-	
+
+	var canWrite: Bool { !configuration.readOnly }
+	enum WriteError: Error { case readonlyStore }
 	private func writeToRealm(_ callback: @escaping (Result<Realm, Error>)->()) {
+		// calling write on a readonly Realm store causes an Objective-C exception to be thrown
+		// so let's just throw our own error before it happens
+		guard canWrite else { return callback(.failure(WriteError.readonlyStore)) }
+
 		queue.async { [weak self] in
 			do {
 				if let realm = try self?.getRealm() {
-					try ObjectiveCExceptions.performTry {
-						realm.beginWrite()
+					try realm.write {
+						callback(.success(realm))
 					}
-					callback(.success(realm))
-					try realm.commitWrite()
 				}
 			}
 			catch {
