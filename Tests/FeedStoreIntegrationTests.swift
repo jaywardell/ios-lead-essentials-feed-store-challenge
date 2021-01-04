@@ -73,7 +73,7 @@ class FeedStoreIntegrationTests: XCTestCase {
 	
 	private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
 		let fileURL = testSpecificStoreURL()
-		let sut = RealmFeedStore(fileURL)
+		let sut = RealmFeedStore(fileURL: fileURL)
 		trackForMemoryLeaks(sut, file: file, line: line)
 		return sut
 	}

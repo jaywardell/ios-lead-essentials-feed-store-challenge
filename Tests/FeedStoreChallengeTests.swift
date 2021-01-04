@@ -174,7 +174,7 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 	func test_insert_deliversErrorOnInsertionError() {
 
 		// trying to write into a realm that is readonly will cause an error
-		let sut = RealmFeedStore(testSpecificReadOnlyStoreURL(), readOnly: true)
+		let sut = RealmFeedStore(fileURL: testSpecificReadOnlyStoreURL(), readOnly: true)
 		trackForMemoryLeaks(sut)
 
 		assertThatInsertDeliversErrorOnInsertionError(on: sut)
@@ -190,7 +190,7 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 		writeEmptyRealmFile(at: testSpecificReadOnlyStoreURL())
 
 		// trying to insert into a realm that is readonly will cause an error
-		let sut = RealmFeedStore(testSpecificReadOnlyStoreURL(), readOnly: true)
+		let sut = RealmFeedStore(fileURL: testSpecificReadOnlyStoreURL(), readOnly: true)
 		trackForMemoryLeaks(sut)
 
 		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
@@ -203,7 +203,7 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 		// create an existing realm at the standard test location
 		// and write to it, but leave it empty
 		// so that a file exists at the expected path
-		let existingRealm = RealmFeedStore(fileURL)
+		let existingRealm = RealmFeedStore(fileURL: fileURL)
 		let exp1 = expectation(description: "Wait for dummy insertion")
 		existingRealm.insert(uniqueImageFeed(), timestamp: Date()) {_ in
 			exp1.fulfill()
@@ -223,7 +223,7 @@ extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
 	func test_delete_deliversErrorOnDeletionError() {
 
 		// trying to delete from a realm that is readonly will cause an error
-		let sut = RealmFeedStore(testSpecificReadOnlyStoreURL(), readOnly: true)
+		let sut = RealmFeedStore(fileURL: testSpecificReadOnlyStoreURL(), readOnly: true)
 		trackForMemoryLeaks(sut)
 
 		assertThatDeleteDeliversErrorOnDeletionError(on: sut)
@@ -239,7 +239,7 @@ extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
 		writeEmptyRealmFile(at: testSpecificReadOnlyStoreURL())
 		
 		// trying to delete from a realm that is readonly will cause an error
-		let sut = RealmFeedStore(testSpecificReadOnlyStoreURL(), readOnly: true)
+		let sut = RealmFeedStore(fileURL: testSpecificReadOnlyStoreURL(), readOnly: true)
 		trackForMemoryLeaks(sut)
 
 		print(testSpecificReadOnlyStoreURL())
@@ -257,7 +257,7 @@ extension FeedStoreChallengeTests {
 	
 	private func makeSUT(at fileURL: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
 		let fileURL = fileURL ?? testSpecificStoreURL()
-		let sut = RealmFeedStore(fileURL)
+		let sut = RealmFeedStore(fileURL: fileURL)
 		trackForMemoryLeaks(sut, file: file, line: line)
 		return sut
 	}

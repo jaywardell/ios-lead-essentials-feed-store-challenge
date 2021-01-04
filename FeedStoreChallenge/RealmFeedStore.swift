@@ -69,7 +69,7 @@ public final class RealmFeedStore: FeedStore {
 	
 	private let configuration: Realm.Configuration
 	private let queue: DispatchQueue
-	public init(_ fileURL: URL, readOnly: Bool = false) {
+	public init(fileURL: URL, readOnly: Bool = false) {
 		self.configuration = Realm.Configuration(fileURL: fileURL, readOnly: readOnly)
 		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated, autoreleaseFrequency: .workItem)
 	}
