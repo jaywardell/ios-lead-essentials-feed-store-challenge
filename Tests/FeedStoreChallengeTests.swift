@@ -163,8 +163,6 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 		let sut = makeSUT(readonly: true)
 
 		assertThatInsertDeliversErrorOnInsertionError(on: sut)
-		
-		clearRealmFiles(at: testSpecificStoreURL())
 	}
 
 	func test_insert_hasNoSideEffectsOnInsertionError() {
@@ -206,8 +204,6 @@ extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
 		let sut = makeSUT(readonly: true)
 
 		assertThatDeleteDeliversErrorOnDeletionError(on: sut)
-		
-		clearRealmFiles(at: testSpecificStoreURL())
 	}
 
 	func test_delete_hasNoSideEffectsOnDeletionError() {
