@@ -13,11 +13,16 @@ import RealmSwift
 /// It should not be used by any code outside this file
 // we would make it fileprivate, but Realm complains with an error
 final class RealmFeedStoreCachedFeedImage: Object {
-	@objc fileprivate dynamic var id: String?
+	@objc fileprivate dynamic var id: String
 	@objc fileprivate dynamic var desc: String?
 	@objc fileprivate dynamic var location: String?
-	@objc fileprivate dynamic var url: String?
+	@objc fileprivate dynamic var url: String
 
+	private override init() {
+		self.id = ""
+		self.url = ""
+	}
+	
 	fileprivate class func create(from localFeedImage: LocalFeedImage, at timestamp: Date) -> RealmFeedStoreCachedFeedImage {
 		
 		let out = RealmFeedStoreCachedFeedImage()
@@ -30,7 +35,7 @@ final class RealmFeedStoreCachedFeedImage: Object {
 	}
 		
 	fileprivate var localFeedImage: LocalFeedImage {
-		LocalFeedImage(id: UUID(uuidString: id!)!, description: desc, location: location, url: URL(string: url!)!)
+		LocalFeedImage(id: UUID(uuidString: id)!, description: desc, location: location, url: URL(string: url)!)
 	}
 }
 
