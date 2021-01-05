@@ -41,19 +41,20 @@ final class RealmFeedStoreCachedFeedImage: Object {
 	}
 }
 
-final class RealmFeedStoreTimestamp: Object {
-	@objc fileprivate dynamic var timestamp: Date
+final class RealmFeedCache: Object {
 	
-	private override init() {
+	@objc fileprivate dynamic var timestamp: Date
+	fileprivate dynamic var images = List<RealmFeedStoreCachedFeedImage>()
+	
+	fileprivate override init() {
 		timestamp = Date.distantPast
 		super.init()
 	}
 	
-	fileprivate class func create(from timestamp: Date) -> RealmFeedStoreTimestamp {
-		
-		let out = RealmFeedStoreTimestamp()
+	static func create(at timestamp: Date, for feedImages: [LocalFeedImage]) -> RealmFeedCache {
+		let out = RealmFeedCache()
 		out.timestamp = timestamp
-		
+		out.images.append(objectsIn: feedImages.map(RealmFeedStoreCachedFeedImage.create(from:)))
 		return out
 	}
 }
@@ -136,11 +137,9 @@ public final class RealmFeedStore: FeedStore {
 				
 			case .success(let realm):
 				realm.deleteAll()
-				
-				for image in feed {
-					realm.add(RealmFeedStoreCachedFeedImage.create(from: image))
-				}
-				realm.add(RealmFeedStoreTimestamp.create(from: timestamp))
+
+				let cache = RealmFeedCache.create(at: timestamp, for: feed)
+				realm.add(cache)
 				
 				completion(nil)
 			}
@@ -155,11 +154,12 @@ public final class RealmFeedStore: FeedStore {
 				return completion(.failure(error))
 			
 			case .success(let realm):
-				guard let timestamp = realm.objects(RealmFeedStoreTimestamp.self).last?.timestamp else { return completion(.empty) }
 				
-				let cached = realm.objects(RealmFeedStoreCachedFeedImage.self)
-				let feedImages = Array(cached.map(\.localFeedImage)).compactMap { $0 }
-				completion(.found(feed: feedImages, timestamp: timestamp))
+				guard let cache = realm.objects(RealmFeedCache.self).last else {
+					return completion(.empty)
+				}
+				
+				completion(.found(feed: cache.images.compactMap(\.localFeedImage), timestamp: cache.timestamp))
 			}
 		}
 	}
