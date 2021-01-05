@@ -64,6 +64,9 @@ public final class RealmFeedStore: FeedStore {
 	
 	private let configuration: Realm.Configuration
 	private let queue: DispatchQueue
+	
+	enum WriteError: Error { case readonlyStore }
+
 	public init(fileURL: URL, readOnly: Bool = false) {
 		self.configuration = Realm.Configuration(fileURL: fileURL, readOnly: readOnly)
 		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated, autoreleaseFrequency: .workItem)
@@ -94,7 +97,6 @@ public final class RealmFeedStore: FeedStore {
 	}
 
 	var canWrite: Bool { !configuration.readOnly }
-	enum WriteError: Error { case readonlyStore }
 	private func writeToRealm(_ callback: @escaping (Result<Realm, Error>)->()) {
 		// calling write on a readonly Realm store causes an Objective-C exception to be thrown
 		// so let's just throw our own error before it happens
