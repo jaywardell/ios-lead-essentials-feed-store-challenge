@@ -51,7 +51,7 @@ final class RealmFeedCache: Object {
 		super.init()
 	}
 	
-	static func create(at timestamp: Date, for feedImages: [LocalFeedImage]) -> RealmFeedCache {
+	static func create(at timestamp: Date, with feedImages: [LocalFeedImage]) -> RealmFeedCache {
 		let out = RealmFeedCache()
 		out.timestamp = timestamp
 		out.images.append(objectsIn: feedImages.map(RealmFeedStoreCachedFeedImage.create(from:)))
@@ -138,7 +138,7 @@ public final class RealmFeedStore: FeedStore {
 			case .success(let realm):
 				realm.deleteAll()
 
-				let cache = RealmFeedCache.create(at: timestamp, for: feed)
+				let cache = RealmFeedCache.create(at: timestamp, with: feed)
 				realm.add(cache)
 				
 				completion(nil)
