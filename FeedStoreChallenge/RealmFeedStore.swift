@@ -122,6 +122,7 @@ public final class RealmFeedStore: FeedStore {
 			do {
 				let realm = try self.getRealm()
 				try realm.write {
+					
 					realm.deleteAll()
 				}
 				completion(nil)
@@ -140,11 +141,11 @@ public final class RealmFeedStore: FeedStore {
 			do {
 				let realm = try self.getRealm()
 				try realm.write {
+					
 					realm.deleteAll()
 
-
 					let cache = RealmFeedCache(timestamp: timestamp, feed: feed)
-				 realm.add(cache)
+					realm.add(cache)
 				}
 				completion(nil)
 			}
