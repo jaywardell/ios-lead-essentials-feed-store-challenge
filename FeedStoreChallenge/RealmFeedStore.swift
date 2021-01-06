@@ -105,54 +105,51 @@ public final class RealmFeedStore: FeedStore {
 		}
 	}
 
-	var canWrite: Bool { !configuration.readOnly }
-	private func writeToRealm(_ callback: @escaping (Result<Realm, Error>)->()) {
+	private var canWrite: Bool { !configuration.readOnly }
+	private func ensureSafeConfiguration() -> Error? {
 		// calling write on a readonly Realm store causes an Objective-C exception to be thrown
 		// so let's just throw our own error before it happens
-		guard canWrite else { return callback(.failure(WriteError.readonlyStore)) }
-
-		queue.async { [weak self] in
-			do {
-				if let realm = try self?.getRealm() {
-					try realm.write {
-						callback(.success(realm))
-					}
-				}
-			}
-			catch {
-				callback(.failure(error))
-			}
+		if !canWrite {
+			return WriteError.readonlyStore
 		}
+		return nil
 	}
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-
-		writeToRealm {
-			switch $0 {
-			case .failure(let error):
-				completion(error)
-			
-			case .success(let realm):
-				realm.deleteAll()
+		if let error = ensureSafeConfiguration() { return completion(error) }
+		
+		queue.async { [self] in
+			do {
+				let realm = try self.getRealm()
+				try realm.write {
+					realm.deleteAll()
+				}
 				completion(nil)
 			}
+			catch {
+				completion(error)
+			}
 		}
+		
 	}
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-		
-		writeToRealm {
-			switch $0 {
-			case .failure(let error):
-				completion(error)
-				
-			case .success(let realm):
-				realm.deleteAll()
+		if let error = ensureSafeConfiguration() { return completion(error) }
 
-				let cache = RealmFeedCache(timestamp: timestamp, feed: feed)
-				realm.add(cache)
-				
+		queue.async { [self] in
+			do {
+				let realm = try self.getRealm()
+				try realm.write {
+					realm.deleteAll()
+
+
+					let cache = RealmFeedCache(timestamp: timestamp, feed: feed)
+				 realm.add(cache)
+				}
 				completion(nil)
+			}
+			catch {
+				completion(error)
 			}
 		}
 	}
