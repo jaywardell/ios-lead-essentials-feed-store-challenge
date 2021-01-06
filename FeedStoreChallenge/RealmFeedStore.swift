@@ -10,16 +10,10 @@ import Foundation
 import RealmSwift
 
 final class RealmFeedStoreCachedFeedImage: Object {
-	@objc fileprivate dynamic var id: String
+	@objc fileprivate dynamic var id: String = ""
 	@objc fileprivate dynamic var desc: String?
 	@objc fileprivate dynamic var location: String?
-	@objc fileprivate dynamic var url: String
-
-	private override init() {
-		self.id = ""
-		self.url = ""
-		super.init()
-	}
+	@objc fileprivate dynamic var url: String = ""
 
 	convenience init(localFeedImage: LocalFeedImage) {
 		self.init()
@@ -40,14 +34,9 @@ final class RealmFeedStoreCachedFeedImage: Object {
 
 final class RealmFeedCache: Object {
 	
-	@objc fileprivate dynamic var timestamp: Date
+	@objc fileprivate dynamic var timestamp: Date = .distantPast
 	fileprivate dynamic var images = List<RealmFeedStoreCachedFeedImage>()
-	
-	fileprivate override init() {
-		timestamp = Date.distantPast
-		super.init()
-	}
-	
+		
 	convenience init(timestamp: Date, feed: [LocalFeedImage]) {
 		self.init()
 		self.timestamp = timestamp
