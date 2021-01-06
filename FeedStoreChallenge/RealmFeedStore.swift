@@ -93,18 +93,6 @@ public final class RealmFeedStore: FeedStore {
 		return _realm!
 	}
 	
-	private func accessRealm(_ callback: @escaping (Result<Realm, Error>)->()) {
-		queue.async { [self] in
-			do {
-				let realm = try getRealm()
-				callback(.success(realm))
-			}
-			catch {
-				callback(.failure(error))
-			}
-		}
-	}
-
 	private var canWrite: Bool { !configuration.readOnly }
 	private func ensureSafeConfiguration() -> Error? {
 		// calling write on a readonly Realm store causes an Objective-C exception to be thrown
@@ -157,18 +145,18 @@ public final class RealmFeedStore: FeedStore {
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
 		
-		accessRealm { result in
-			switch result {
-			case .failure(let error):
-				return completion(.failure(error))
-			
-			case .success(let realm):
+		queue.async { [self] in
+			do {
+				let realm = try getRealm()
 				
 				guard let cache = realm.objects(RealmFeedCache.self).last else {
 					return completion(.empty)
 				}
 				
 				completion(.found(feed: cache.images.compactMap(\.localFeedImage), timestamp: cache.timestamp))
+			}
+			catch {
+				completion(.failure(error))
 			}
 		}
 	}
