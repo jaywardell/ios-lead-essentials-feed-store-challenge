@@ -57,10 +57,7 @@ public final class RealmFeedStore: FeedStore {
 		case inMemoryIdentifier(String)
 	}
 	
-	/// use this initializer for testing purposes only
-	///
-	/// use init(fileURL: URL) for production code
-	public init(_ configuration:Configuration, readOnly: Bool) {
+	internal init(_ configuration:Configuration, readOnly: Bool) {
 		switch configuration {
 		case .fileURL(let URL):
 		self.configuration = Realm.Configuration(fileURL: URL, readOnly: readOnly)
@@ -70,9 +67,12 @@ public final class RealmFeedStore: FeedStore {
 		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated, autoreleaseFrequency: .workItem)
 	}
 	
-	/// use this initializer for production code
 	public convenience init(fileURL: URL) {
 		self.init(.fileURL(fileURL), readOnly: false)
+	}
+	
+	public convenience init(inMemoryIdentifier identifier: String = UUID().uuidString) {
+		self.init(.inMemoryIdentifier(identifier), readOnly: false)
 	}
 	
 	private var _realm: Realm?

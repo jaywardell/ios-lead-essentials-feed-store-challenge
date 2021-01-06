@@ -3,7 +3,7 @@
 //
 
 import XCTest
-import FeedStoreChallenge
+@testable import FeedStoreChallenge
 import RealmSwift
 
 class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
