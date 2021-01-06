@@ -63,16 +63,29 @@ public final class RealmFeedStore: FeedStore {
 	
 	enum WriteError: Error { case readonlyStore }
 
-	public init(fileURL: URL, readOnly: Bool = false) {
-		self.configuration = Realm.Configuration(fileURL: fileURL, readOnly: readOnly)
+	public enum Configuration {
+		case fileURL(URL)
+		case inMemoryIdentifier(String)
+	}
+	
+	/// use this initializer for testing purposes only
+	///
+	/// use init(fileURL: URL) for production code
+	public init(_ configuration:Configuration, readOnly: Bool) {
+		switch configuration {
+		case .fileURL(let URL):
+		self.configuration = Realm.Configuration(fileURL: URL, readOnly: readOnly)
+		case .inMemoryIdentifier(let identifier):
+		self.configuration = Realm.Configuration(inMemoryIdentifier: identifier, readOnly: readOnly)
+		}
 		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated, autoreleaseFrequency: .workItem)
 	}
 	
-	public init(inMemoryIdentifier: String, readOnly: Bool = false) {
-		self.configuration = Realm.Configuration(inMemoryIdentifier: inMemoryIdentifier, readOnly: readOnly)
-		self.queue = DispatchQueue(label: "\(type(of: Self.self))", qos: .userInitiated, autoreleaseFrequency: .workItem)
+	/// use this initializer for production code
+	public convenience init(fileURL: URL) {
+		self.init(.fileURL(fileURL), readOnly: false)
 	}
-
+	
 	private var _realm: Realm?
 	private func getRealm() throws -> Realm {
 		if let existing = _realm { return existing }

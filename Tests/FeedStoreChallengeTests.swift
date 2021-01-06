@@ -229,10 +229,10 @@ extension FeedStoreChallengeTests {
 	private func makeSUT(at fileURL: URL? = nil, readonly: Bool = false, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
 		let sut: RealmFeedStore
 		if let fileURL = fileURL {
-			sut = RealmFeedStore(fileURL: fileURL, readOnly: readonly)
+			sut = RealmFeedStore(.fileURL(fileURL), readOnly: readonly)
 		}
 		else {
-			sut = RealmFeedStore(inMemoryIdentifier: UUID().uuidString, readOnly: readonly)
+			sut = RealmFeedStore(.inMemoryIdentifier(UUID().uuidString), readOnly: readonly)
 		}
 		trackForMemoryLeaks(sut, file: file, line: line)
 		return sut
