@@ -186,7 +186,7 @@ extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 		// create an existing realm at the standard test location
 		// and write to it, but leave it empty
 		// so that a file exists at the expected path
-		let existingRealm = RealmFeedStore(fileURL: fileURL)
+		let existingRealm = makeSUT(at: testSpecificStoreURL())
 		insert((feed: [], timestamp: Date()), to: existingRealm)
 		deleteCache(from: existingRealm)
 	}
