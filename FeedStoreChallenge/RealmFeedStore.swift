@@ -20,18 +20,15 @@ final class RealmFeedStoreCachedFeedImage: Object {
 		self.url = ""
 		super.init()
 	}
-	
-	fileprivate class func create(from localFeedImage: LocalFeedImage) -> RealmFeedStoreCachedFeedImage {
-		
-		let out = RealmFeedStoreCachedFeedImage()
-		out.id = localFeedImage.id.uuidString
-		out.desc = localFeedImage.description
-		out.location = localFeedImage.location
-		out.url = localFeedImage.url.absoluteString
-				
-		return out
+
+	convenience init(localFeedImage: LocalFeedImage) {
+		self.init()
+		self.id = localFeedImage.id.uuidString
+		self.desc = localFeedImage.description
+		self.location = localFeedImage.location
+		self.url = localFeedImage.url.absoluteString
 	}
-		
+			
 	fileprivate var localFeedImage: LocalFeedImage? {
 		guard let uuid = UUID(uuidString: id),
 			  let url = URL(string: url) else {
@@ -51,11 +48,10 @@ final class RealmFeedCache: Object {
 		super.init()
 	}
 	
-	static func create(at timestamp: Date, with feedImages: [LocalFeedImage]) -> RealmFeedCache {
-		let out = RealmFeedCache()
-		out.timestamp = timestamp
-		out.images.append(objectsIn: feedImages.map(RealmFeedStoreCachedFeedImage.create(from:)))
-		return out
+	convenience init(timestamp: Date, feed: [LocalFeedImage]) {
+		self.init()
+		self.timestamp = timestamp
+		self.images.append(objectsIn: feed.map(RealmFeedStoreCachedFeedImage.init(localFeedImage:)))
 	}
 }
 
@@ -140,7 +136,7 @@ public final class RealmFeedStore: FeedStore {
 			case .success(let realm):
 				realm.deleteAll()
 
-				let cache = RealmFeedCache.create(at: timestamp, with: feed)
+				let cache = RealmFeedCache(timestamp: timestamp, feed: feed)
 				realm.add(cache)
 				
 				completion(nil)
